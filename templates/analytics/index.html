@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Job Analytics</h1>
+        <div class="flex space-x-4">
+            <a href="{{ url_for('analytics.completed_jobs') }}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                View Completed Jobs
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Jobs</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ total_stats.total_jobs or 0 }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Completed Jobs</h3>
+            <p class="text-3xl font-bold text-green-600">{{ total_stats.completed_jobs or 0 }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Revenue</h3>
+            <p class="text-3xl font-bold text-indigo-600">${{ "%.2f"|format(total_stats.total_revenue or 0) }}</p>
+        </div>
+    </div>
+
+    <!-- Monthly Stats -->
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Monthly Statistics ({{ year }})</h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                {% for stat in monthly_stats %}
+                <div class="bg-gray-50 rounded p-4 text-center">
+                    <h4 class="font-semibold text-gray-700">{{ stat.month|month_name }}</h4>
+                    <p class="text-2xl font-bold text-blue-600 mb-2">{{ stat.completed_count }}</p>
+                    <p class="text-sm text-gray-600">${{ "%.2f"|format(stat.total_value or 0) }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Performance Metrics</h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Average Completion Time</h3>
+                    <p class="text-2xl font-bold text-blue-600">
+                        {{ "%.1f"|format(avg_completion_time or 0) }} hours
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Completion Rate</h3>
+                    <p class="text-2xl font-bold text-green-600">
+                        {% if total_stats.total_jobs %}
+                            {{ "%.1f"|format((total_stats.completed_jobs / total_stats.total_jobs * 100) or 0) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

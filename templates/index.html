@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+    <div class="relative py-3 sm:max-w-xl sm:mx-auto">
+        <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+            <div class="max-w-md mx-auto">
+                <div class="divide-y divide-gray-200">
+                    <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                        <h1 class="text-3xl font-bold text-blue-600 mb-8">Welcome to Job Tracker</h1>
+                        
+                        {% if current_user.is_authenticated %}
+                        <p class="mb-4">Welcome back, {{ current_user.name }}!</p>
+                        <div class="space-y-4">
+                            <a href="{{ url_for('dashboard.index') }}" 
+                               class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                                Go to Dashboard
+                            </a>
+                            <a href="{{ url_for('jobs.index') }}"
+                               class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                                View Jobs
+                            </a>
+                        </div>
+                        {% else %}
+                        <p class="mb-4">Please log in to access the job tracking system.</p>
+                        <a href="{{ url_for('auth.login') }}"
+                           class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            Login
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

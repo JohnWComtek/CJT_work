@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Export Jobs{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Export Jobs</h1>
+        </div>
+
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <form method="POST" action="{{ url_for('exports.generate_export') }}">
+                <!-- Export Format -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Export Format</label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="format" value="pdf" class="form-radio" checked>
+                            <span class="ml-2">PDF</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="format" value="csv" class="form-radio">
+                            <span class="ml-2">CSV</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Job Status -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Job Status</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="status" value="new" class="form-checkbox">
+                            <span class="ml-2">New</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="status" value="quote_needed" class="form-checkbox">
+                            <span class="ml-2">Quote Needed</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="status" value="scheduled" class="form-checkbox">
+                            <span class="ml-2">Scheduled</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="status" value="in_progress" class="form-checkbox">
+                            <span class="ml-2">In Progress</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="status" value="completed" class="form-checkbox">
+                            <span class="ml-2">Completed</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="status" value="to_be_billed" class="form-checkbox">
+                            <span class="ml-2">To Be Billed</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Date Range -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Date Range</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm mb-2">Start Date</label>
+                            <input type="date" name="start_date" 
+                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm mb-2">End Date</label>
+                            <input type="date" name="end_date" 
+                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end">
+                    <button type="submit" 
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Generate Export
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Export Tips -->
+        <div class="bg-blue-50 rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-blue-800 mb-4">Export Tips</h2>
+            <ul class="list-disc list-inside text-blue-700 space-y-2">
+                <li>Leave status checkboxes empty to include all statuses</li>
+                <li>PDF exports include detailed job information and are best for printing</li>
+                <li>CSV exports are best for data analysis and importing into spreadsheets</li>
+                <li>Date range is optional - leave empty to include all dates</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add date range validation
+    const startDate = document.querySelector('input[name="start_date"]');
+    const endDate = document.querySelector('input[name="end_date"]');
+
+    endDate.addEventListener('change', function() {
+        if (startDate.value && this.value) {
+            if (this.value < startDate.value) {
+                alert('End date must be after start date');
+                this.value = '';
+            }
+        }
+    });
+
+    startDate.addEventListener('change', function() {
+        if (endDate.value && this.value) {
+            if (endDate.value < this.value) {
+                alert('Start date must be before end date');
+                this.value = '';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 
