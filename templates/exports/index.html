@@ -3,95 +3,210 @@
 {% block title %}Export Jobs{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-3xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Export Jobs</h1>
-        </div>
-
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-            <form method="POST" action="{{ url_for('exports.generate_export') }}">
-                <!-- Export Format -->
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Export Format</label>
-                    <div class="flex space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="format" value="pdf" class="form-radio" checked>
-                            <span class="ml-2">PDF</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="format" value="csv" class="form-radio">
-                            <span class="ml-2">CSV</span>
-                        </label>
-                    </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">Export Jobs</h1>
+                    <p class="text-muted">Generate reports and data exports</p>
                 </div>
+            </div>
 
-                <!-- Job Status -->
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Job Status</label>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="status" value="new" class="form-checkbox">
-                            <span class="ml-2">New</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="status" value="quote_needed" class="form-checkbox">
-                            <span class="ml-2">Quote Needed</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="status" value="scheduled" class="form-checkbox">
-                            <span class="ml-2">Scheduled</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="status" value="in_progress" class="form-checkbox">
-                            <span class="ml-2">In Progress</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="status" value="completed" class="form-checkbox">
-                            <span class="ml-2">Completed</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="status" value="to_be_billed" class="form-checkbox">
-                            <span class="ml-2">To Be Billed</span>
-                        </label>
-                    </div>
-                </div>
+            <div class="row g-4">
+                <!-- Export Form -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('exports.generate_export') }}" class="needs-validation" novalidate>
+                                <!-- Export Format -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Export Format</label>
+                                    <div class="d-flex gap-4">
+                                        <div class="form-check">
+                                            <input type="radio" id="format-pdf" name="format" value="pdf" class="form-check-input" checked>
+                                            <label class="form-check-label" for="format-pdf">
+                                                <i class="fas fa-file-pdf text-danger me-2"></i>PDF
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="radio" id="format-csv" name="format" value="csv" class="form-check-input">
+                                            <label class="form-check-label" for="format-csv">
+                                                <i class="fas fa-file-csv text-success me-2"></i>CSV
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input type="radio" id="format-excel" name="format" value="excel" class="form-check-input">
+                                            <label class="form-check-label" for="format-excel">
+                                                <i class="fas fa-file-excel text-primary me-2"></i>Excel
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <!-- Date Range -->
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Date Range</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-700 text-sm mb-2">Start Date</label>
-                            <input type="date" name="start_date" 
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <!-- Job Status -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Job Status</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="status-new" name="status" value="new" class="form-check-input">
+                                                <label class="form-check-label" for="status-new">
+                                                    <span class="badge bg-secondary me-2">New</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="status-quote" name="status" value="quote_needed" class="form-check-input">
+                                                <label class="form-check-label" for="status-quote">
+                                                    <span class="badge bg-info me-2">Quote Needed</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="status-scheduled" name="status" value="scheduled" class="form-check-input">
+                                                <label class="form-check-label" for="status-scheduled">
+                                                    <span class="badge bg-primary me-2">Scheduled</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="status-progress" name="status" value="in_progress" class="form-check-input">
+                                                <label class="form-check-label" for="status-progress">
+                                                    <span class="badge bg-warning me-2">In Progress</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="status-completed" name="status" value="completed" class="form-check-input">
+                                                <label class="form-check-label" for="status-completed">
+                                                    <span class="badge bg-success me-2">Completed</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="status-billed" name="status" value="to_be_billed" class="form-check-input">
+                                                <label class="form-check-label" for="status-billed">
+                                                    <span class="badge bg-danger me-2">To Be Billed</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-link btn-sm p-0" id="select-all-status">
+                                            Select All
+                                        </button>
+                                        <span class="text-muted mx-2">|</span>
+                                        <button type="button" class="btn btn-link btn-sm p-0" id="clear-all-status">
+                                            Clear All
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Date Range -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Date Range</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-calendar"></i>
+                                                </span>
+                                                <input type="date" name="start_date" class="form-control" 
+                                                       placeholder="Start Date">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="fas fa-calendar"></i>
+                                                </span>
+                                                <input type="date" name="end_date" class="form-control" 
+                                                       placeholder="End Date">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Date Filters -->
+                                <div class="mb-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-date-range="today">Today</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-date-range="week">This Week</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-date-range="month">This Month</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-date-range="year">This Year</button>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Options -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Additional Options</label>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="include-images" name="include_images" class="form-check-input">
+                                                <label class="form-check-label" for="include-images">
+                                                    Include Job Images (PDF only)
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="include-notes" name="include_notes" class="form-check-input">
+                                                <label class="form-check-label" for="include-notes">
+                                                    Include Job Notes
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-download me-2"></i>Generate Export
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div>
-                            <label class="block text-gray-700 text-sm mb-2">End Date</label>
-                            <input type="date" name="end_date" 
-                                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end">
-                    <button type="submit" 
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Generate Export
-                    </button>
+                <!-- Export Tips -->
+                <div class="col-md-4">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>Export Tips
+                            </h5>
+                            <hr>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <small>Leave status checkboxes empty to include all statuses</small>
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <small>PDF exports include detailed job information and are best for printing</small>
+                                </li>
+                                <li class="mb-3">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <small>CSV exports are best for data analysis and importing into spreadsheets</small>
+                                </li>
+                                <li>
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <small>Excel exports combine the best of both formats with formatting</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
-
-        <!-- Export Tips -->
-        <div class="bg-blue-50 rounded-lg p-6">
-            <h2 class="text-lg font-semibold text-blue-800 mb-4">Export Tips</h2>
-            <ul class="list-disc list-inside text-blue-700 space-y-2">
-                <li>Leave status checkboxes empty to include all statuses</li>
-                <li>PDF exports include detailed job information and are best for printing</li>
-                <li>CSV exports are best for data analysis and importing into spreadsheets</li>
-                <li>Date range is optional - leave empty to include all dates</li>
-            </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -99,27 +214,81 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Add date range validation
+    // Date range validation
     const startDate = document.querySelector('input[name="start_date"]');
     const endDate = document.querySelector('input[name="end_date"]');
+    const dateRangeButtons = document.querySelectorAll('[data-date-range]');
+    const statusCheckboxes = document.querySelectorAll('input[name="status"]');
+    const selectAllStatus = document.getElementById('select-all-status');
+    const clearAllStatus = document.getElementById('clear-all-status');
+    const formatRadios = document.querySelectorAll('input[name="format"]');
+    const includeImagesCheck = document.getElementById('include-images');
 
-    endDate.addEventListener('change', function() {
-        if (startDate.value && this.value) {
-            if (this.value < startDate.value) {
+    // Date validation
+    function validateDates() {
+        if (startDate.value && endDate.value) {
+            if (endDate.value < startDate.value) {
                 alert('End date must be after start date');
-                this.value = '';
+                endDate.value = '';
+                return false;
             }
         }
+        return true;
+    }
+
+    startDate.addEventListener('change', validateDates);
+    endDate.addEventListener('change', validateDates);
+
+    // Quick date filters
+    dateRangeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const range = this.dataset.dateRange;
+            const today = new Date();
+            let start = new Date();
+            
+            switch(range) {
+                case 'today':
+                    break;
+                case 'week':
+                    start.setDate(today.getDate() - today.getDay());
+                    break;
+                case 'month':
+                    start.setDate(1);
+                    break;
+                case 'year':
+                    start.setMonth(0, 1);
+                    break;
+            }
+            
+            startDate.value = start.toISOString().split('T')[0];
+            endDate.value = today.toISOString().split('T')[0];
+        });
     });
 
-    startDate.addEventListener('change', function() {
-        if (endDate.value && this.value) {
-            if (endDate.value < this.value) {
-                alert('Start date must be before end date');
-                this.value = '';
-            }
-        }
+    // Status checkboxes
+    selectAllStatus.addEventListener('click', () => {
+        statusCheckboxes.forEach(cb => cb.checked = true);
     });
+
+    clearAllStatus.addEventListener('click', () => {
+        statusCheckboxes.forEach(cb => cb.checked = false);
+    });
+
+    // Format-specific options
+    function updateFormatOptions() {
+        const selectedFormat = document.querySelector('input[name="format"]:checked').value;
+        includeImagesCheck.disabled = selectedFormat !== 'pdf';
+        if (includeImagesCheck.disabled) {
+            includeImagesCheck.checked = false;
+        }
+    }
+
+    formatRadios.forEach(radio => {
+        radio.addEventListener('change', updateFormatOptions);
+    });
+
+    // Initial setup
+    updateFormatOptions();
 });
 </script>
 {% endblock %}
