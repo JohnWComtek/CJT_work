@@ -113,6 +113,67 @@ class Job(db.Model):
             db.or_(
                 Job.title.ilike(f'%{query_text}%'),
                 Job.description.ilike(f'%{query_text}%'),
-                Job.notes.ilike(f'%{query_text}%')
+                Job.notes.ilike(f'%{query_text}%'),
+                Job.location.ilike(f'%{query_text}%'),
+                Job.materials_needed.ilike(f'%{query_text}%'),
+                db.cast(Job.id, db.String).ilike(f'%{query_text}%')
             )
-        ).all() 
+        ).order_by(Job.created_at.desc()).all()
+
+    @staticmethod
+    def get_sorted_jobs(sort_by='created_at', order='desc', search_query=None, status=None):
+        query = Job.query
+
+        if search_query:
+            query = query.filter(
+                db.or_(
+                    Job.title.ilike(f'%{search_query}%'),
+                    Job.description.ilike(f'%{search_query}%'),
+                    Job.notes.ilike(f'%{search_query}%'),
+                    Job.location.ilike(f'%{search_query}%'),
+                    Job.materials_needed.ilike(f'%{search_query}%'),
+                    db.cast(Job.id, db.String).ilike(f'%{search_query}%')
+                )
+            )
+
+        if status:
+            query = query.filter(Job.status == status)
+
+        if sort_by == 'created_at':
+            query = query.order_by(Job.created_at.desc() if order == 'desc' else Job.created_at)
+        elif sort_by == 'scheduled_date':
+            query = query.order_by(Job.scheduled_date.desc() if order == 'desc' else Job.scheduled_date)
+        elif sort_by == 'priority':
+            query = query.order_by(Job.priority.desc() if order == 'desc' else Job.priority)
+        elif sort_by == 'status':
+            query = query.order_by(Job.status.desc() if order == 'desc' else Job.status)
+        elif sort_by == 'estimated_cost':
+            query = query.order_by(Job.estimated_cost.desc() if order == 'desc' else Job.estimated_cost)
+
+        return query
+
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    caller_name = db.Column(db.String(120), nullable=False)
+    company_name = db.Column(db.String(120))
+    email = db.Column(db.String(120))
+    phone = db.Column(db.String(20))
+    address = db.Column(db.String(255))
+    reason_for_call = db.Column(db.Text, nullable=False)
+    follow_up_details = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_contact_created_by_id'))
+    created_by = db.relationship('User', backref=db.backref('contacts_created', lazy='dynamic'))
+    status = db.Column(db.String(50), default='pending')  # pending, in_progress, completed, no_action_needed
+
+    @staticmethod
+    def search(query_text):
+        return Contact.query.filter(
+            db.or_(
+                Contact.caller_name.ilike(f'%{query_text}%'),
+                Contact.company_name.ilike(f'%{query_text}%'),
+                Contact.email.ilike(f'%{query_text}%'),
+                Contact.reason_for_call.ilike(f'%{query_text}%'),
+                Contact.follow_up_details.ilike(f'%{query_text}%')
+            )
+        ).order_by(Contact.created_at.desc()).all() 

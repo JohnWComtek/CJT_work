@@ -4,6 +4,7 @@ from models import Job, User, Client, JobImage, db
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
+from sqlalchemy import desc
 
 jobs_bp = Blueprint('jobs', __name__)
 
@@ -14,8 +15,33 @@ def allowed_file(filename):
 @jobs_bp.route('/jobs')
 @login_required
 def index():
-    jobs = Job.query.all() if current_user.has_role('admin') else Job.query.filter_by(assigned_to=current_user).all()
-    return render_template('jobs/index.html', jobs=jobs)
+    page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('search', '')
+    sort_by = request.args.get('sort_by', 'created_at')
+    order = request.args.get('order', 'desc')
+    status_filter = request.args.get('status', '')
+
+    # Get base query
+    query = Job.get_sorted_jobs(sort_by, order, search_query, status_filter if status_filter else None)
+
+    # Filter by user role
+    if not current_user.has_role('admin'):
+        query = query.filter_by(assigned_to=current_user)
+
+    # Paginate results
+    jobs = query.paginate(page=page, per_page=20)
+    
+    # Get all possible job statuses for the filter
+    statuses = db.session.query(Job.status).distinct().all()
+    status_list = [status[0] for status in statuses]
+
+    return render_template('jobs/index.html', 
+                         jobs=jobs,
+                         search_query=search_query,
+                         sort_by=sort_by,
+                         order=order,
+                         status_filter=status_filter,
+                         status_list=status_list)
 
 @jobs_bp.route('/jobs/new', methods=['GET', 'POST'])
 @login_required

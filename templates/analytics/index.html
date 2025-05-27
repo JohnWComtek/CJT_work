@@ -3,76 +3,428 @@
 {% block title %}Analytics{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Job Analytics</h1>
-        <div class="flex space-x-4">
-            <a href="{{ url_for('analytics.completed_jobs') }}" 
-               class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                View Completed Jobs
-            </a>
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Analytics Dashboard</h1>
+            <p class="text-muted">Performance insights and metrics</p>
         </div>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Jobs</h3>
-            <p class="text-3xl font-bold text-blue-600">{{ total_stats.total_jobs or 0 }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">Completed Jobs</h3>
-            <p class="text-3xl font-bold text-green-600">{{ total_stats.completed_jobs or 0 }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Revenue</h3>
-            <p class="text-3xl font-bold text-indigo-600">${{ "%.2f"|format(total_stats.total_revenue or 0) }}</p>
-        </div>
-    </div>
-
-    <!-- Monthly Stats -->
-    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-800">Monthly Statistics ({{ year }})</h2>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                {% for stat in monthly_stats %}
-                <div class="bg-gray-50 rounded p-4 text-center">
-                    <h4 class="font-semibold text-gray-700">{{ stat.month|month_name }}</h4>
-                    <p class="text-2xl font-bold text-blue-600 mb-2">{{ stat.completed_count }}</p>
-                    <p class="text-sm text-gray-600">${{ "%.2f"|format(stat.total_value or 0) }}</p>
-                </div>
+        <div class="d-flex gap-2">
+            <select class="form-select" id="yearSelect" onchange="updateDashboard()">
+                {% for y in range(2020, year + 1) %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
                 {% endfor %}
+            </select>
+            <select class="form-select" id="monthSelect" onchange="updateDashboard()">
+                {% for m in range(1, 13) %}
+                <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ m|month_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Today's Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <h5 class="text-muted mb-3">Today's Overview</h5>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="stats-icon bg-primary">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-subtitle mb-2 text-muted">New Jobs</h6>
+                            <h2 class="card-title mb-0">{{ today_stats.new_jobs or 0 }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="stats-icon bg-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-subtitle mb-2 text-muted">Completed Today</h6>
+                            <h2 class="card-title mb-0">{{ today_stats.completed_jobs or 0 }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="stats-icon bg-info">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-subtitle mb-2 text-muted">Today's Revenue</h6>
+                            <h2 class="card-title mb-0">${{ "%.2f"|format(today_stats.revenue or 0) }}</h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Performance Metrics -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-800">Performance Metrics</h2>
+    <!-- Monthly Performance -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <h5 class="text-muted mb-3">Monthly Performance</h5>
         </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Average Completion Time</h3>
-                    <p class="text-2xl font-bold text-blue-600">
-                        {{ "%.1f"|format(avg_completion_time or 0) }} hours
-                    </p>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Jobs</h6>
+                    <h2 class="card-title">{{ current_month_stats.total_jobs or 0 }}</h2>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Completion Rate</h3>
-                    <p class="text-2xl font-bold text-green-600">
-                        {% if total_stats.total_jobs %}
-                            {{ "%.1f"|format((total_stats.completed_jobs / total_stats.total_jobs * 100) or 0) }}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    </p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Completed Jobs</h6>
+                    <h2 class="card-title">{{ current_month_stats.completed_jobs or 0 }}</h2>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ (current_month_stats.completed_jobs / current_month_stats.total_jobs * 100) if current_month_stats.total_jobs else 0 }}%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Revenue</h6>
+                    <h2 class="card-title">${{ "%.2f"|format(current_month_stats.total_revenue or 0) }}</h2>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Avg Job Value</h6>
+                    <h2 class="card-title">${{ "%.2f"|format(current_month_stats.avg_job_value or 0) }}</h2>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Monthly Revenue Trend</h5>
+                    <div style="height: 300px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Job Status Distribution</h5>
+                    <div style="height: 300px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technician Performance -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <h5 class="text-muted mb-3">Technician Performance</h5>
+        </div>
+        {% for tech in tech_performance %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">{{ tech.name }}</h6>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Completion Rate</span>
+                            <span class="text-success">
+                                {{ "%.1f"|format((tech.completed_jobs / tech.total_jobs * 100) if tech.total_jobs else 0) }}%
+                            </span>
+                        </div>
+                        <div class="progress mb-3" style="height: 4px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ (tech.completed_jobs / tech.total_jobs * 100) if tech.total_jobs else 0 }}%">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted">Total Jobs</div>
+                                <div class="h5 mb-0">{{ tech.total_jobs }}</div>
+                            </div>
+                            <div>
+                                <div class="text-muted">Revenue</div>
+                                <div class="h5 mb-0">${{ "%.2f"|format(tech.total_revenue or 0) }}</div>
+                            </div>
+                            <div>
+                                <div class="text-muted">Avg Time</div>
+                                <div class="h5 mb-0">{{ "%.1f"|format((tech.avg_completion_time / 3600) if tech.avg_completion_time else 0) }}h</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Top Clients and Recent Activity -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Top Clients This Month</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Jobs</th>
+                                    <th>Total Spent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in top_clients %}
+                                <tr>
+                                    <td>{{ client.name }}</td>
+                                    <td>{{ client.total_jobs }}</td>
+                                    <td>${{ "%.2f"|format(client.total_spent or 0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Recent Activity</h5>
+                    <div class="timeline">
+                        {% for job in recent_activity %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-{{ 'success' if job.status == 'completed' else 'info' }}"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0">{{ job.title }}</h6>
+                                <small class="text-muted">{{ job.updated_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                <div>Status: <span class="badge bg-{{ 'success' if job.status == 'completed' else 'info' }}">{{ job.status }}</span></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -1.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-top: 0.4rem;
+    }
+
+    .timeline-content {
+        position: relative;
+        padding-left: 0.5rem;
+    }
+
+    .timeline-item:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: -1.09rem;
+        top: 1rem;
+        bottom: 0;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .table-responsive {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for stat in monthly_stats %}'{{ stat.month|month_name }}',{% endfor %}],
+            datasets: [{
+                label: 'Monthly Revenue',
+                data: [{% for stat in monthly_stats %}{{ stat.total_value or 0 }},{% endfor %}],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#3498db',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD'
+                                }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD',
+                                maximumSignificantDigits: 3
+                            }).format(value);
+                        }
+                    },
+                    grid: {
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+
+    // Status Distribution Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for status in status_distribution %}'{{ status.status }}',{% endfor %}],
+            datasets: [{
+                data: [{% for status in status_distribution %}{{ status.count }},{% endfor %}],
+                backgroundColor: ['#3498db', '#2ecc71', '#e74c3c', '#f1c40f', '#95a5a6']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+
+function updateDashboard() {
+    const year = document.getElementById('yearSelect').value;
+    const month = document.getElementById('monthSelect').value;
+    window.location.href = `{{ url_for('analytics.index') }}?year=${year}&month=${month}`;
+}
+</script>
 {% endblock %} 

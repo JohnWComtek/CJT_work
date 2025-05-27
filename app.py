@@ -6,6 +6,7 @@ from models import db, User
 from routes.clients import clients_bp
 from routes.analytics import analytics_bp
 from routes.exports import exports_bp
+from routes.contacts import contacts_bp
 import calendar
 
 login_manager = LoginManager()
@@ -41,6 +42,7 @@ def create_app():
     app.register_blueprint(clients_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(exports_bp)
+    app.register_blueprint(contacts_bp)
 
     @login_manager.user_loader
     def load_user(user_id):
